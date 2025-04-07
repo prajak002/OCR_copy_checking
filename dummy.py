@@ -19,25 +19,24 @@ def cleanFiles(currentMem, exMem):
             else:
                 active_members.append(member)
 
+        # Truncate and rewrite currentMem with only active members
         currFile.seek(0)
         currFile.truncate()
         currFile.writelines(active_members)
 
+        # Ensure the header is written once to exMem
+        oldFile.seek(0)
+        existing_lines = oldFile.readlines()
+        oldFile.seek(0)
+        oldFile.truncate()
+
+        if existing_lines:
+            if existing_lines[0].strip() != header.strip():
+                oldFile.write(header)
+            else:
+                oldFile.write(existing_lines[0])
+            oldFile.writelines(existing_lines[1:])
+        else:
+            oldFile.write(header)
+
         oldFile.writelines(inactive_members)
-
-
-# === File paths ===
-memReg = 'members.txt'     # Current members file
-exReg = 'inactive.txt'     # Inactive (ex) members file
-
-# Run the function
-cleanFiles(memReg, exReg)
-
-# Print the updated files
-print("Active Members: \n")
-with open(memReg, 'r') as readFile:
-    print(readFile.read())
-
-print("Inactive Members: \n")
-with open(exReg, 'r') as readFile:
-    print(readFile.read())
