@@ -1,37 +1,43 @@
-import os
+def cleanFiles(currentMem, exMem):
+    with open(currentMem, 'r+') as currFile, open(exMem, 'a+') as oldFile:
+        currFile.seek(0)
+        lines = currFile.readlines()
 
-def update_members():
-    current_file = r'C:\Users\User\Desktop\savedfiles\currentMem.txt'
-    ex_file = r'C:\Users\User\Desktop\savedfiles\exMem.txt'
+        if not lines:
+            return
 
-    if not os.path.exists(current_file):
-        print(f"❌ File not found: {current_file}")
-        return
+        header = lines[0]
+        members = lines[1:]
 
-    with open(current_file, 'r') as file:
-        lines = file.readlines()
+        active_members = [header]
+        inactive_members = []
 
-    if not lines:
-        print("⚠️ currentMem.txt is empty.")
-        return
+        for member in members:
+            parts = member.strip().split()
+            if parts and parts[-1].lower() == 'no':
+                inactive_members.append(member)
+            else:
+                active_members.append(member)
 
-    header = lines[0]
-    active_members = [header]
-    removed_members = []
+        currFile.seek(0)
+        currFile.truncate()
+        currFile.writelines(active_members)
 
-    for line in lines[1:]:
-        parts = line.strip().split()
-        if parts and parts[-1].lower() == 'no':
-            removed_members.append(line)
-        else:
-            active_members.append(line)
+        oldFile.writelines(inactive_members)
 
-    with open(current_file, 'w') as file:
-        file.writelines(active_members)
 
-    with open(ex_file, 'a') as file:
-        file.writelines(removed_members)
+# === File paths ===
+memReg = 'members.txt'     # Current members file
+exReg = 'inactive.txt'     # Inactive (ex) members file
 
-    print("✅ Update complete: Removed members moved to exMem.txt")
+# Run the function
+cleanFiles(memReg, exReg)
 
-update_members()
+# Print the updated files
+print("Active Members: \n")
+with open(memReg, 'r') as readFile:
+    print(readFile.read())
+
+print("Inactive Members: \n")
+with open(exReg, 'r') as readFile:
+    print(readFile.read())
